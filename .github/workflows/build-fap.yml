@@ -1,0 +1,67 @@
+name: Build FAP
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Test protocol core and saved filenames
+        run: ./test/run_tests.sh
+
+      - name: Install uFBT
+        run: pip install ufbt
+
+      - name: Build FAP
+        run: ufbt
+
+      - name: Upload build artifact
+        if: startsWith(github.ref, 'refs/tags/') == false
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: tele_radio_remote.fap
+          path: dist/tele_radio_remote.fap
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Test protocol core and saved filenames
+        run: ./test/run_tests.sh
+
+      - name: Install uFBT
+        run: pip install ufbt
+
+      - name: Build FAP
+        run: ufbt
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/tele_radio_remote.fap
+          fail_on_unmatched_files: true
+          name: ${{ github.ref_name }} - Tele Radio T20 FAP

@@ -1,0 +1,19 @@
+App(
+    appid="tele_radio_remote",
+    name="Tele Radio T20",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="tele_radio_remote_app",
+    targets=["f7"],
+    stack_size=4 * 1024,
+    requires=["gui", "storage"],
+    sources=[
+        "tele_radio_remote_app.c",
+        "tele_radio_remote_core.c",
+        "tele_radio_remote_radio.c",
+        "tele_radio_remote_storage.c",
+    ],
+    fap_version=(0, 1),
+    fap_category="Sub-GHz",
+    fap_icon="icon.png",
+    fap_description="Record, save, and replay Tele Radio T20 remotes (869.85 / 433.92 MHz)",
+)
